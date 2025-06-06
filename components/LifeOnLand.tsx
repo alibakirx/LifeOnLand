@@ -391,13 +391,13 @@ const LifeOnLand: React.FC = () => {
       }
 
       p.draw = () => {
-        if (p.frameCount % 10 === 0) updateGrid((d + 0.2) / 1.2);
+        if (p.frameCount % 5 === 0) updateGrid((d + 0.2) / 1.2); // Moderate updates for stability
         update_voronoi();
         displayGrid();
         drawForestElements();
         updateAnimals();
         drawAnimals();
-        d = p.constrain(d + deltaHop(p.millis() / 5000), 0, 1);
+        d = p.constrain(d + deltaHop(p.millis() / 4000), 0, 1); // Balanced evolution speed
       };
 
       function pinch(v: number, x: number): number {
@@ -520,25 +520,23 @@ const LifeOnLand: React.FC = () => {
 
       // Visualization - Much calmer terrain movement
       function displayGrid() {
-        p.background(45, 80, 22, 40); // Dark green land background with more opacity for calmer feel
+        p.background(45, 80, 22, 60); // Dark green land background with more opacity for calmer feel
         p.noStroke();
         
-        const skipFactor = 1; // Draw every cell for solid terrain
+        const skipFactor = 1; // Keep every cell for solid terrain coverage
         
         for (let x = 0; x < cols; x += skipFactor) {
           for (let y = 0; y < rows; y += skipFactor) {
             const stateIndex = (grid[x][y] + (voronoi_offset ? cellOwners[x][y] % 3 : 0)) % N;
             p.fill(terrainStates[stateIndex]);
             
-            // Much reduced vibration effect - very subtle movement
-            const vibrateX = p.noise(x * 0.05, y * 0.05, p.frameCount * 0.005) * 0.5 - 0.25; // Much smaller range
-            const vibrateY = p.noise(x * 0.05 + 100, y * 0.05 + 100, p.frameCount * 0.005) * 0.5 - 0.25; // Much smaller range
-            
-            const finalSize = cellSize * skipFactor;
+            // Gentle organic movement like gentle wind through grass
+            const gentleWave = p.sin(x * 0.02 + y * 0.025 + p.frameCount * 0.01) * 0.8;
+            const finalSize = cellSize * skipFactor + gentleWave;
             
             p.rect(
-              x * cellSize + vibrateX, 
-              y * cellSize + vibrateY, 
+              x * cellSize, 
+              y * cellSize, 
               finalSize, 
               finalSize
             );
